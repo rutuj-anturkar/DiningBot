@@ -10,34 +10,36 @@ Original file is located at
 import json
 
 fop = []
-with open('Chinesedata.json') as json_file:
+with open('Thaidata.json') as json_file:
     data = json.load(json_file)
     for line in data:
-        output = {}
-        output['id'] = line['id']
-        output['cuisine'] = line['cuisine']
-        fop.append(output)
+        outrest = {}
+        outrest['id'] = line['id']
+        outrest['cuisine'] = line['cuisine']
+        fop.append(outrest)
 
-with open('elasticdata_new.json','a') as jsonFile:
+with open('elastic_search_data.json','a') as jsonFile:
     json.dump(fop, jsonFile)
 
 fop = []
 bulk_format = { "index" : { "_index": "restaurants", "_type":"RESTAURANT"}}
-with open('elasticdata_new.json') as json_file:
+with open('elastic_search_data.json') as json_file:
     data = json.load(json_file)
     for line in data:
         fop.append(bulk_format)
-        output = {}
-        output['id'] = line['id']
-        output['cuisine'] = line['cuisine']
-        fop.append(output)
+        outrest = {}
+        outrest['id'] = line['id']
+        outrest['cuisine'] = line['cuisine']
+        fop.append(outrest)
 
-with open('finaltestfile.json','a') as jsonFile:
+with open('finalfile.json','a') as jsonFile:
     for line in fop:
         jsonFile.write(str(line))
         jsonFile.write("\n")
 
-with open('finaltestfile.json','r') as jsonrFile:
-    with open("finalbulk_data.json","a") as jsonFile:
+with open('finalfile.json','r') as jsonrFile:
+    with open("bulk_data_final.json","a") as jsonFile:
         for line in jsonrFile:
             jsonFile.write(line.replace("\'","\""))
+            
+!curl -XPOST -u 'Master-user:Master-password' 'https://search-pkrsa1-dbjt77czbiunt7bbas3vvyrec4.us-east-1.es.amazonaws.com/_bulk' --data-binary @bulk_data_final.json -H 'Content-Type: application/json'
