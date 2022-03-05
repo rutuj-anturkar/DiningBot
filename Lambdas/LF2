@@ -1,179 +1,121 @@
-import json
 import boto3
+import json
 import logging
-from boto3.dynamodb.conditions import Key,Attr
+from boto3.dynamodb.conditions import Key, Attr
 from botocore.vendored import requests
-from requests.auth import HTTPBasicAuth
 from botocore.exceptions import ClientError
-import random
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-def helper(text):
-    Perfect = ['Chinese','Indian','Italian','Thai','Mexican']
-    if text in Perfect:
-        return text
-    if text.lower() == 'chinese':
-        return 'Chinese'
-    if text.lower() == 'indian':
-        return 'Indian'
-    if text.lower() == 'italian' :
-        return 'Italian'
-    if text.lower() == 'thai':
-        return "Thai"
-    if text.lower() == 'mexican':
-        return "Mexican"
-
-def pullSQS():
+def getSQSMsg():
     SQS = boto3.client("sqs")
-    s = SQS.get_queue_url(QueueName = "DineQueue")["QueueUrl"]
+    url = 'https://sqs.us-east-1.amazonaws.com/454749049315/DiningQueue'
     response = SQS.receive_message(
-        QueueUrl = s,
-        MessageAttributeNames = ['All'])
+        QueueUrl=url, 
+        AttributeNames=['SentTimestamp'],
+        MessageAttributeNames=['All'],
+        VisibilityTimeout=0,
+        WaitTimeSeconds=0
+    )
     try:
-        message = response["Messages"][0]
-    except:
-        logger.debug("No Messages or Error")
+        message = response['Messages'][0]
+        if message is None:
+            logger.debug("Empty message")
+            return None
+    except KeyError:
+        logger.debug("No message in the queue")
         return None
-    logger.debug(message)
-    messages = response["Messages"]
-    for msg in messages:
-        SQS.delete_message(
-            QueueUrl = s,
-            ReceiptHandle = msg['ReceiptHandle'])
-    return messages
-
-def backup_incase_es_down(cuisine_msg):
-    
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('yelp_restaurant')
-    count = 0
-    result = ""
-
-    scan_kwags = {
-        'FilterExpression' : Key('cuisine').eq(helper(cuisine_msg))
-    }
-    search_cuisine = table.scan(**scan_kwags)
-    while count < 3:
-        search_item = search_cuisine['Items'][count]
-        search_name = search_item['name']
-        search_address = search_item['address']
-        result = result + str(count) + search_name + search_address + ". "
-        count = count + 1
-    return result
-
-def es_start(cuisine_msg):
-    query = "https://search-assignment1-y7e244cuvw5v26h5ot4ogbxjty.us-east-1.es.amazonaws.com/restaurants/_search?q={}&pretty=true".format(helper(cuisine_msg))
-    result = requests.get(query,auth=HTTPBasicAuth('fall2021','CloudComputing2021!'))
-    listofrestaurants = (json.loads(result.content.decode('utf-8')))["hits"]["hits"]
-    listlen = len(listofrestaurants)
-    listofids = []
-    for i in range(5):
-        searchindex = random.randint(0,listlen-1)
-        rest = (listofrestaurants[searchindex])['_source']['id']
-        listofids.append(rest)
-    logger.debug(listofids)
-    return listofids
-    
-def fetch_db(listofids):
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('yelp-restaurants')
-    count = 0
-    result = ""
-    for id in listofids:
-        scan_kwags = {
-            'FilterExpression' : Key('id').eq(id)
-        }
-        search_cuisine = table.scan(**scan_kwags)
-        search_item = search_cuisine['Items'][0]
-        search_name = search_item['name']
-        search_address = search_item['address']
-        count = count + 1
-        result = result + str(count) + ". " + search_name + " located at " + search_address + ". "
-        if count == 3:
-            break
-    return result
+    message = response['Messages'][0]
+    SQS.delete_message(
+            QueueUrl=url,
+            ReceiptHandle=message['ReceiptHandle']
+        )
+    logger.debug('Received and deleted message: %s' % response)
+    return message
 
 def lambda_handler(event, context):
-    # TODO implement
-    responses = pullSQS()
-    if responses is None:
-        return ""
-    logger.debug("reponses length {}".format(len(responses)))
-    countsent=0
-    for response in responses:
-        location = response["MessageAttributes"]["Location"]["StringValue"]
-        cuisine = response["MessageAttributes"]["Cuisine"]["StringValue"]
-        date = response["MessageAttributes"]["Date"]["StringValue"]
-        time = response["MessageAttributes"]["Time"]["StringValue"]
-        numberofpeople = response["MessageAttributes"]["NumberofPeople"]["StringValue"]
-        emailaddress = response["MessageAttributes"]["EmailAddress"]["StringValue"]
-        #result = backup_incase_es_down(cuisine)
-        listofids = es_start(cuisine)
-        result = fetch_db(listofids)
-        responsestart = "Hello! Here are my {} restaurant suggestion".format(cuisine) + " for {} people".format(numberofpeople) + " for {} ".format(date) + " at time {} ".format(time)
-        finalresult = responsestart + result
-        RECIPIENT = emailaddress
-        SENDER = "rutuj.anturkar@gmail.com"
-        AWS_REGION = "us-east-1"
-        
-        # The subject line for the email.
-        SUBJECT = "Amazon SES Test (SDK for Python)"
-        
-        # The email body for recipients with non-HTML email clients.
-        BODY_TEXT = (finalresult)
-                    
-        # The HTML body of the email.
-        BODY_HTML = finalresult           
-        
-        # The character encoding for the email.
-        CHARSET = "UTF-8"
-        
-        # Create a new SES resource and specify a region.
-        client = boto3.client('ses',region_name=AWS_REGION)
-        
-        # Try to send the email.
-        try:
-            #Provide the contents of the email.
-            response = client.send_email(
-                Destination={
-                    'ToAddresses': [
-                        RECIPIENT,
-                    ],
-                },
-                Message={
-                    'Body': {
-                        'Html': {
-                            'Charset': CHARSET,
-                            'Data': BODY_HTML,
-                        },
-                        'Text': {
-                            'Charset': CHARSET,
-                            'Data': BODY_TEXT,
-                        },
-                    },
-                    'Subject': {
-                        'Charset': CHARSET,
-                        'Data': SUBJECT,
-                    },
-                },
-                Source=SENDER
-            )
-        # Display an error if something goes wrong.	
-        except ClientError as e:
-            print(e.response['Error']['Message'])
-        else:
-            logger.debug("Email sent! Message ID:"),
-            logger.debug(response['MessageId'])
-            countsent = countsent + 1
-    return countsent
     
+    """
+        Query SQS to get the messages
+        Store the relevant info, and pass it to the Elastic Search
+    """
+    
+    message = getSQSMsg() #data will be a json object
+    if message is None:
+        logger.debug("No Cuisine or PhoneNum key found in message")
+        return
+    cuisine = message["MessageAttributes"]["Cuisine"]["StringValue"]
+    location = message["MessageAttributes"]["Location"]["StringValue"]
+    date = message["MessageAttributes"]["Date"]["StringValue"]
+    time = message["MessageAttributes"]["Time"]["StringValue"]
+    numOfPeople = message["MessageAttributes"]["NumPeople"]["StringValue"]
+    email_address = message["MessageAttributes"]["email_address"]["StringValue"]
+    
+    if not cuisine or not email_address:
+        logger.debug("No Cuisine or PhoneNum key found in message")
+        return
+    
+    """
+        Query database based on elastic search results
+        Store the relevant info, create the message and sns the info
+    """
+    
+    es_query = "https://search-pkrsa1-dbjt77czbiunt7bbas3vvyrec4.us-east-1.es.amazonaws.com/_search?q={cuisine}".format(
+        cuisine=cuisine)
+    esResponse = requests.get(es_query)
+    data = json.loads(esResponse.content.decode('utf-8'))
+    try:
+        esData = data["hits"]["hits"]
+    except KeyError:
+        logger.debug("Error extracting hits from ES response")
+    
+    # extract bID from AWS ES
+    ids = []
+    for restaurant in esData:
+        ids.append(restaurant["_source"]["id"])
+    
+    messageToSend = 'Hello! Here are my {cuisine} restaurant suggestions in {location} for {numPeople} people, for {diningDate} at {diningTime}: '.format(
+            cuisine=cuisine,
+            location=location,
+            numPeople=numOfPeople,
+            diningDate=date,
+            diningTime=time,
+        )
 
-'''def lambda_handler(event, context):
-    # TODO implement
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table('yelp-restaurants')
+    itr = 1
+    for id in ids:
+        if itr == 6:
+            break
+        response = table.scan(FilterExpression=Attr('id').eq(id))
+        item = response['Items'][0]
+        if response is None:
+            continue
+        restaurantMsg = '' + str(itr) + '. '
+        name = item["name"]
+        address = item["address"]
+        restaurantMsg += name +', located at ' + address +'. '
+        messageToSend += restaurantMsg
+        itr += 1
+        
+    messageToSend += "Enjoy your meal!!"
+    
+    try:
+        client = boto3.client('sns', region_name= 'ap-southeast-1')
+        response = client.publish(
+            PhoneNumber=phoneNumber,
+            Message= messageToSend,
+            MessageStructure='string'
+        )
+    except KeyError:
+        logger.debug("Error sending ")
+    logger.debug("response - %s",json.dumps(response) )
+    logger.debug("Message = '%s' Phone Number = %s" % (messageToSend, phoneNumber))
+    
     return {
         'statusCode': 200,
-        'body': json.dumps('Hello from Lambda!')
+        'body': json.dumps("LF2 running succesfully")
     }
-'''
+    # return messageToSend
