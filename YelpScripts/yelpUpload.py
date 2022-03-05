@@ -7,8 +7,8 @@ from datetime import datetime
 from decimal import Decimal
 
 session = boto3.Session(
-    aws_access_key_id="AKIAWTYJH2HRWLITRQK3",
-    aws_secret_access_key="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",
+    aws_access_key_id="",
+    aws_secret_access_key="",
     region_name="us-east-1"
 )
 
