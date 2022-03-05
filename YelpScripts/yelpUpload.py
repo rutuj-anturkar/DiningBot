@@ -56,6 +56,6 @@ def load_restaurant(restaurant, dynamodb=None):
 
 
 if __name__ == '__main__':
-    with open("Chinesedata.json") as json_file:
-        restaurant_list = json.load(json_file, parse_float=Decimal)
-    load_restaurant(restaurant_list)
+    with open("Italiandata.json") as json_file:
+        list_of_restaurants = json.load(json_file, parse_float=Decimal)
+    load_restaurant(list_of_restaurants)
