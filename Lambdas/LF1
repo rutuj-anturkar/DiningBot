@@ -15,6 +15,7 @@ import os
 import logging
 import boto3
 import json
+import re
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -59,8 +60,8 @@ def record(event):
                     "StringValue": str(get_slots(event)["MemberCount"]),
                     "DataType": "String"
                 },
-                "PhoneNum" : {
-                    "StringValue": str(get_slots(event)["PhoneNumber"]),
+                "email_address" : {
+                    "StringValue": str(get_slots(event)["Email"]),
                     "DataType": "String"
                 }
             }
@@ -116,6 +117,22 @@ def isvalid_date(date):
         return True
     except ValueError:
         return False
+        
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+ 
+# Define a function for
+# for validating an Email
+ 
+ 
+def check(email):
+ 
+    # pass the regular expression
+    # and the string into the fullmatch() method
+    if(re.fullmatch(regex, email)):
+        return True
+ 
+    else:
+        return False
 
 
 def parse_int(n):
@@ -137,7 +154,7 @@ def build_validation_result(is_valid, violated_slot, message_content):
         'message': {'contentType': 'PlainText', 'content': message_content}
     }
 
-def validate_dining_suggestion(location, cuisine, time, date, numberOfPeople, phoneNumber):
+def validate_dining_suggestion(location, cuisine, time, date, numberOfPeople, phoneNumber, email_address):
     locations = ['manhattan', 'new york']
     if location is not None and location.lower() not in locations:
         return build_validation_result(False,
@@ -184,7 +201,13 @@ def validate_dining_suggestion(location, cuisine, time, date, numberOfPeople, ph
         return build_validation_result(False,
                                        'PhoneNumber',
                                        'That does not look like a valid number {}, '
-                                       'Could you please repeat? '.format(phoneNumber))    
+                                       'Could you please repeat? '.format(phoneNumber))  
+    
+    if email_address is not None:
+        is_valid_email = check(email_address)
+        if (not is_valid_email):
+            return build_validation_result(False, 'EmailAddress', "Your email address is not correct")
+    
     return build_validation_result(True, None, None)
 
 
@@ -199,6 +222,7 @@ def diningSuggestions(intent_request,context):
     time = get_slots(intent_request)["DiningTime"]
     numberOfPeople = get_slots(intent_request)["MemberCount"]
     phoneNumber = get_slots(intent_request)["PhoneNumber"]
+    email_address = get_slots(intent_request)["Email"]
     source = intent_request['invocationSource']
 
     if source == 'DialogCodeHook':
@@ -206,7 +230,7 @@ def diningSuggestions(intent_request,context):
         # Use the elicitSlot dialog action to re-prompt for the first violation detected.
         slots = get_slots(intent_request)
 
-        validation_result = validate_dining_suggestion(location, cuisine, time, date, numberOfPeople, phoneNumber)
+        validation_result = validate_dining_suggestion(location, cuisine, time, date, numberOfPeople, phoneNumber, email_address)
         if not validation_result['isValid']:
             slots[validation_result['violatedSlot']] = None
             return elicit_slot(intent_request['sessionAttributes'],
@@ -225,7 +249,7 @@ def diningSuggestions(intent_request,context):
     return close(intent_request['sessionAttributes'],
                  'Fulfilled',
                  {'contentType': 'PlainText',
-                  'content': 'Thank you for the information, we are generating our recommendations, we will send the recommendations to your phone when they are generated'})
+                  'content': 'Thank you for the information, we are generating our recommendations, we will send the recommendations to your email when they are generated'})
 
 
 """ --- Intents --- """
