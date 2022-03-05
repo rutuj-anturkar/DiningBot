@@ -26,18 +26,18 @@ while status_code==200:
     status_code = response.status_code
     business_data = response.json()
     if response.status_code==200:
-            for biz in business_data['businesses']:
-                output = {}
-                output['id'] = biz['id']
-                output['name'] = biz['name']
-                output['cuisine'] = biz['categories']
-                output['contact'] = biz['phone']
-                output['address'] = ", ".join(biz['location']['display_address'])
-                output['zipcode'] = biz['location']['zip_code']
-                output['coordinates'] = biz['coordinates']
-                output['reviewcount'] = biz['review_count']
-                output['rating'] = biz['rating']
-                fop.append(output)
+            for buzz in business_data['businesses']:
+                yelpout = {}
+                yelpout['id'] = buzz['id']
+                yelpout['name'] = buzz['name']
+                yelpout['cuisine'] = buzz['categories']
+                yelpout['contact'] = buzz['phone']
+                yelpout['address'] = ", ".join(buzz['location']['display_address'])
+                yelpout['zipcode'] = buzz['location']['zip_code']
+                yelpout['coordinates'] = buzz['coordinates']
+                yelpout['reviewcount'] = buzz['review_count']
+                yelpout['rating'] = buzz['rating']
+                fop.append(yelpout)
     PARAMETERS['offset'] = PARAMETERS['offset']+50
     time.sleep(2)
     i = i+1
@@ -66,18 +66,18 @@ while status_code==200:
     status_code = response.status_code
     business_data = response.json()
     if response.status_code==200:
-            for biz in business_data['businesses']:
-                output = {}
-                output['id'] = biz['id']
-                output['name'] = biz['name']
-                output['cuisine'] = biz['categories']
-                output['contact'] = biz['phone']
-                output['address'] = ", ".join(biz['location']['display_address'])
-                output['zipcode'] = biz['location']['zip_code']
-                output['coordinates'] = biz['coordinates']
-                output['reviewcount'] = biz['review_count']
-                output['rating'] = biz['rating']
-                fop.append(output)
+            for buzz in business_data['businesses']:
+                yelpout = {}
+                yelpout['id'] = buzz['id']
+                yelpout['name'] = buzz['name']
+                yelpout['cuisine'] = buzz['categories']
+                yelpout['contact'] = buzz['phone']
+                yelpout['address'] = ", ".join(buzz['location']['display_address'])
+                yelpout['zipcode'] = buzz['location']['zip_code']
+                yelpout['coordinates'] = buzz['coordinates']
+                yelpout['reviewcount'] = buzz['review_count']
+                yelpout['rating'] = buzz['rating']
+                fop.append(yelpout)
     PARAMETERS['offset'] = PARAMETERS['offset']+50
     time.sleep(2)
     i = i+1
@@ -106,18 +106,18 @@ while status_code==200:
     status_code = response.status_code
     business_data = response.json()
     if response.status_code==200:
-            for biz in business_data['businesses']:
-                output = {}
-                output['id'] = biz['id']
-                output['name'] = biz['name']
-                output['cuisine'] = biz['categories']
-                output['contact'] = biz['phone']
-                output['address'] = ", ".join(biz['location']['display_address'])
-                output['zipcode'] = biz['location']['zip_code']
-                output['coordinates'] = biz['coordinates']
-                output['reviewcount'] = biz['review_count']
-                output['rating'] = biz['rating']
-                fop.append(output)
+            for buzz in business_data['businesses']:
+                yelpout = {}
+                yelpout['id'] = buzz['id']
+                yelpout['name'] = buzz['name']
+                yelpout['cuisine'] = buzz['categories']
+                yelpout['contact'] = buzz['phone']
+                yelpout['address'] = ", ".join(buzz['location']['display_address'])
+                yelpout['zipcode'] = buzz['location']['zip_code']
+                yelpout['coordinates'] = buzz['coordinates']
+                yelpout['reviewcount'] = buzz['review_count']
+                yelpout['rating'] = buzz['rating']
+                fop.append(yelpout)
     PARAMETERS['offset'] = PARAMETERS['offset']+50
     time.sleep(2)
     i = i+1
@@ -142,18 +142,18 @@ while status_code==200:
     status_code = response.status_code
     business_data = response.json()
     if response.status_code==200:
-            for biz in business_data['businesses']:
-                output = {}
-                output['id'] = biz['id']
-                output['name'] = biz['name']
-                output['cuisine'] = biz['categories']
-                output['contact'] = biz['phone']
-                output['address'] = ", ".join(biz['location']['display_address'])
-                output['zipcode'] = biz['location']['zip_code']
-                output['coordinates'] = biz['coordinates']
-                output['reviewcount'] = biz['review_count']
-                output['rating'] = biz['rating']
-                fop.append(output)
+            for buzz in business_data['businesses']:
+                yelpout = {}
+                yelpout['id'] = buzz['id']
+                yelpout['name'] = buzz['name']
+                yelpout['cuisine'] = buzz['categories']
+                yelpout['contact'] = buzz['phone']
+                yelpout['address'] = ", ".join(buzz['location']['display_address'])
+                yelpout['zipcode'] = buzz['location']['zip_code']
+                yelpout['coordinates'] = buzz['coordinates']
+                yelpout['reviewcount'] = buzz['review_count']
+                yelpout['rating'] = buzz['rating']
+                fop.append(yelpout)
     PARAMETERS['offset'] = PARAMETERS['offset']+50
     time.sleep(2)
     i = i+1
@@ -178,18 +178,18 @@ while status_code==200:
     status_code = response.status_code
     business_data = response.json()
     if response.status_code==200:
-            for biz in business_data['businesses']:
-                output = {}
-                output['id'] = biz['id']
-                output['name'] = biz['name']
-                output['cuisine'] = biz['categories']
-                output['contact'] = biz['phone']
-                output['address'] = ", ".join(biz['location']['display_address'])
-                output['zipcode'] = biz['location']['zip_code']
-                output['coordinates'] = biz['coordinates']
-                output['reviewcount'] = biz['review_count']
-                output['rating'] = biz['rating']
-                fop.append(output)
+            for buzz in business_data['businesses']:
+                yelpout = {}
+                yelpout['id'] = buzz['id']
+                yelpout['name'] = buzz['name']
+                yelpout['cuisine'] = buzz['categories']
+                yelpout['contact'] = buzz['phone']
+                yelpout['address'] = ", ".join(buzz['location']['display_address'])
+                yelpout['zipcode'] = buzz['location']['zip_code']
+                yelpout['coordinates'] = buzz['coordinates']
+                yelpout['reviewcount'] = buzz['review_count']
+                yelpout['rating'] = buzz['rating']
+                fop.append(yelpout)
     PARAMETERS['offset'] = PARAMETERS['offset']+50
     time.sleep(2)
     i = i+1
@@ -214,18 +214,18 @@ while status_code==200:
     status_code = response.status_code
     business_data = response.json()
     if response.status_code==200:
-            for biz in business_data['businesses']:
-                output = {}
-                output['id'] = biz['id']
-                output['name'] = biz['name']
-                output['cuisine'] = biz['categories']
-                output['contact'] = biz['phone']
-                output['address'] = ", ".join(biz['location']['display_address'])
-                output['zipcode'] = biz['location']['zip_code']
-                output['coordinates'] = biz['coordinates']
-                output['reviewcount'] = biz['review_count']
-                output['rating'] = biz['rating']
-                fop.append(output)
+            for buzz in business_data['businesses']:
+                yelpout = {}
+                yelpout['id'] = buzz['id']
+                yelpout['name'] = buzz['name']
+                yelpout['cuisine'] = buzz['categories']
+                yelpout['contact'] = buzz['phone']
+                yelpout['address'] = ", ".join(buzz['location']['display_address'])
+                yelpout['zipcode'] = buzz['location']['zip_code']
+                yelpout['coordinates'] = buzz['coordinates']
+                yelpout['reviewcount'] = buzz['review_count']
+                yelpout['rating'] = buzz['rating']
+                fop.append(yelpout)
     PARAMETERS['offset'] = PARAMETERS['offset']+50
     time.sleep(2)
     i = i+1
